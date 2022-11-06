@@ -14,6 +14,7 @@ export const DECORATORS = {
   API_EXCLUDE_CONTROLLER: `${DECORATORS_PREFIX}/apiExcludeController`,
   API_EXTRA_MODELS: `${DECORATORS_PREFIX}/apiExtraModels`,
   API_EXTENSION: `${DECORATORS_PREFIX}/apiExtension`,
+  API_METHOD: `${DECORATORS_PREFIX}/apiMethod`,
 };
 
 export const OPENAPI_NAMESPACE = 'openapi';

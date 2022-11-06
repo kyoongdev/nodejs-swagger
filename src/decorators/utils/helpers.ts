@@ -1,3 +1,5 @@
+import { isArray } from 'lodash';
+
 export function createMethodDecorator<T = any>(metakey: string, metadata: T): MethodDecorator {
   return (target: object, key: string | symbol, descriptor: PropertyDescriptor) => {
     Reflect.defineMetadata(metakey, metadata, descriptor.value);
@@ -21,4 +23,19 @@ export function createMixedDecorator<T = any>(metakey: string, metadata: T): Met
     Reflect.defineMetadata(metakey, metadata, target);
     return target;
   };
+}
+
+export function getTypeIsArrayTuple(
+  input: Function | [Function] | undefined | string | Record<string, any>,
+  isArrayFlag?: boolean
+): [Function | undefined, boolean] {
+  if (!input) {
+    return [input as undefined, isArrayFlag ?? false];
+  }
+  if (isArrayFlag) {
+    return [input as Function, isArrayFlag];
+  }
+  const isInputArray = isArray(input);
+  const type = isInputArray ? input[0] : input;
+  return [type as Function, isInputArray];
 }

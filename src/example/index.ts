@@ -1,20 +1,35 @@
 import { Property, RequestAPI } from 'decorators';
 import { ApiTags } from 'decorators/api-tags';
 import type { NextFunction, Request, Response } from 'express';
+
 import { Router } from 'express';
 
-class TestDTO {
-  @Property()
-  name?: string;
+class TestDTO2 {
+  @Property({ type: 'string' })
+  adsfasd: string;
 
-  @Property()
-  age?: number;
+  @Property({ type: 'number' })
+  sdfsa: number;
 }
 
-@ApiTags('hello')
+class TestDTO {
+  @Property({ type: 'string' })
+  name: string;
+
+  @Property({ type: 'number' })
+  age: number;
+
+  @Property({ type: 'string', isArray: true })
+  names: string[];
+
+  @Property({ type: TestDTO2, isArray: true })
+  testDto: TestDTO2[];
+}
+
+@ApiTags({ path: '/test', tag: 'test' })
 export class Test {
   router: Router;
-  path = '/test';
+
   constructor() {
     this.router = Router();
   }
@@ -22,7 +37,12 @@ export class Test {
   @RequestAPI({
     path: '/real',
     method: 'get',
-    type: TestDTO,
+    body: {
+      type: TestDTO,
+    },
+    query: {
+      type: TestDTO2,
+    },
   })
   public test(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');
