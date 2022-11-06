@@ -28,6 +28,7 @@ export type TProperty = {
 export type TRequestAPI = {
   method: HTTPMethod;
   path: string;
+  summary?: string;
   type?: Type<unknown> | Function | [Function] | string;
   in?: string;
   name?: string;
@@ -62,6 +63,7 @@ export const defaultOptions: TProperty = {
 export interface SwaggerOptions {
   path: string;
   method: HTTPMethod;
+  summary?: string;
   headers?: TProperty | TProperty[];
   params?: TProperty | TProperty[];
   query?: TProperty | TProperty[];

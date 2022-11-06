@@ -1,3 +1,1 @@
-export const ResponseAPI = () => {
-  console.log('ResponseAPI');
-};
+export const ResponseAPI = () => {};

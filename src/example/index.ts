@@ -47,4 +47,33 @@ export class Test {
   public test(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');
   }
+
+  @RequestAPI({
+    path: '/realy',
+    method: 'get',
+    summary: 'ssss',
+    body: {
+      type: TestDTO,
+    },
+    query: {
+      type: TestDTO,
+    },
+  })
+  public test2(req: Request, res: Response, next: NextFunction) {
+    res.status(200).send('hello');
+  }
+
+  @RequestAPI({
+    path: '/realy',
+    method: 'post',
+    body: {
+      type: TestDTO,
+    },
+    query: {
+      type: TestDTO,
+    },
+  })
+  public test3(req: Request, res: Response, next: NextFunction) {
+    res.status(200).send('hello');
+  }
 }

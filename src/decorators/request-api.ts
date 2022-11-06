@@ -4,7 +4,7 @@ import type { ParamDecorators, SwaggerOptions } from './type';
 import { createBody, createHeader, createParam, createQuery } from './utils';
 
 export const RequestAPI = (props: SwaggerOptions) => {
-  const { headers, params, query, body, path, method } = props;
+  const { headers, params, query, body, path, method, summary } = props;
   const paramDecorators: ParamDecorators[] = [];
 
   if (headers) paramDecorators.push(...(Array.isArray(headers) ? headers.map(createHeader) : [createHeader(headers)]));
@@ -18,12 +18,21 @@ export const RequestAPI = (props: SwaggerOptions) => {
         const parameters = Reflect.getMetadata(DECORATORS.API_PARAMETERS, descriptor.value) || [];
 
         Reflect.defineMetadata(
+          DECORATORS.API_METHOD,
+          {
+            pathName: path,
+            method,
+          },
+          descriptor.value
+        );
+        Reflect.defineMetadata(
           DECORATORS.API_PARAMETERS,
           [
             ...parameters,
             {
               ...initial,
               path,
+              summary,
               method,
               ...pickBy(metadata, negate(isUndefined)),
             },

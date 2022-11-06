@@ -3,11 +3,13 @@ import { DECORATORS } from 'decorators/constants';
 import type { TProperty, TRequestAPI, Type } from 'decorators/type';
 import type { Express } from 'express';
 import { Router } from 'express';
+import { flatten } from 'lodash';
 import swaggerUi from 'swagger-ui-express';
 import { PropertyFactory } from './property-factory';
 import type { TInstance, TModelProperty, TPath, TSwaggerDocuments } from './type';
 
 import defaultSwagger from './defaultSwagger.json';
+import { parceArrayJson, registerBody, registerParams } from './utils';
 
 class SwaggerApplication {
   private app: Express;
@@ -21,7 +23,7 @@ class SwaggerApplication {
       const expressRouter = Router() as any;
       const instance = new (router as any)();
 
-      const { tag, path }: TApiTag = Reflect.getMetadata(DECORATORS.API_TAGS, router);
+      const { tag, path: basePath }: TApiTag = Reflect.getMetadata(DECORATORS.API_TAGS, router);
 
       const methods = Object.getOwnPropertyNames(router.prototype).filter((item) => item !== 'constructor');
 
@@ -41,94 +43,25 @@ class SwaggerApplication {
         router: expressRouter,
         swaggerDocs: {
           tag,
-          basePath: path,
+          basePath,
           paths,
         },
       });
       return instances;
     }, []);
 
-    this.generateSwagger(instances);
     this.initRouters(instances);
   };
 
   private initRouters = (instances: TInstance[]) => {
+    this.generateSwagger(instances);
     instances.forEach(({ router, swaggerDocs }) => {
       this.app.use(swaggerDocs.basePath, router);
     });
   };
 
   private generateSwagger = (instances: TInstance[]) => {
-    const swaggerDocs = instances.reduce<TSwaggerDocuments[]>((acc, next) => {
-      const { swaggerDocs } = next;
-      acc.push(swaggerDocs);
-      return acc;
-    }, []);
-
-    const definitionProps: any[] = [];
-
-    const docs = swaggerDocs.reduce<Record<string, any>>((acc, swaggerDoc) => {
-      const { basePath, paths, tag } = swaggerDoc;
-
-      const pathName = basePath + paths[0].params.path;
-      const method = paths[0].params.method;
-
-      const pathDocs = paths.reduce<Record<string, any>>((acc, next) => {
-        const { params, properties } = next;
-
-        const definitionName = (params.type as any).name;
-
-        definitionProps.push(this.generateDefinitions(definitionName, properties));
-        console.log(properties);
-        if (params.in === 'body') {
-          acc['requestBody'] = {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  $ref: `#/components/schemas/${definitionName}`,
-                },
-              },
-            },
-          };
-        } else {
-          acc['parameters'] = properties.map((property) => {
-            return {
-              in: params.in,
-              name: property.key,
-              required: !property.nullable,
-              schema: {
-                type: property.type,
-              },
-            };
-          });
-        }
-
-        return acc;
-      }, {});
-
-      acc[pathName] = {
-        [method]: {
-          tags: [tag],
-          ...pathDocs,
-        },
-      };
-      return acc;
-    }, {});
-
-    const definitions = definitionProps.reduce<Record<string, any>>((acc, next) => {
-      return { ...acc, ...next };
-    }, {});
-
-    const swaggerApiDocs = {
-      ...defaultSwagger,
-      paths: docs,
-      definitions,
-      components: {
-        schemas: definitions,
-      },
-    };
+    const swaggerDocs = flatten(instances.map((instance): TSwaggerDocuments => instance.swaggerDocs));
 
     const options = {
       swaggerOptions: {
@@ -136,55 +69,86 @@ class SwaggerApplication {
       },
     };
     this.app.get('/swagger.json', (req, res) => {
-      res.status(200).json(swaggerApiDocs);
+      res.status(200).json(this.generateSwaggerDocs(swaggerDocs));
     });
     this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, options));
   };
 
-  private generateDefinitions = (name: string, properties: TProperty[]) => {
+  private generateSwaggerDocs = (swaggerDocs: TSwaggerDocuments[]) => {
+    const schemaProps: any[] = [];
+
+    const docs = swaggerDocs.reduce<Record<string, any>>((acc, swaggerDoc) => {
+      const { basePath, paths, tag } = swaggerDoc;
+
+      const schemaObj: Record<string, any> = {
+        operationId: '',
+        tags: [tag],
+        summary: '',
+        requestBody: {},
+        parameters: [],
+      };
+      return paths.reduce<Record<string, any>>((acc, next) => {
+        const { params, properties } = next;
+
+        const schemaName = (params.type as any).name;
+        schemaProps.push(this.generateSchemas(schemaName, properties));
+
+        if (params.in === 'body') {
+          schemaObj['requestBody'] = registerBody(schemaName);
+        } else {
+          schemaObj['parameters'] = registerParams(params.in || '', properties);
+        }
+        schemaObj.operationId = `${params.method}:${basePath + params.path}`;
+        schemaObj.summary = params.summary ?? '';
+        acc[basePath + params.path] = {
+          ...(acc[basePath + params.path] ?? {}),
+          [params.method]: {
+            ...schemaObj,
+          },
+        };
+
+        return acc;
+      }, {});
+    }, {});
+
+    return {
+      ...defaultSwagger,
+      paths: docs,
+      components: {
+        schemas: parceArrayJson(schemaProps),
+      },
+    };
+  };
+
+  private generateSchemas = (name: string, properties: TProperty[]) => {
     const required = properties.filter((property) => !property.nullable).map((property) => property.key);
-    const definitions: any[] = [];
+    const schemas: any[] = [];
+
     const swaggerProperties = properties.reduce<Record<string, any>>((acc, next) => {
       if (next.key) {
-        if (!next.isArray) {
-          if (typeof next.type === 'string') {
-            acc[next.key] = {
-              type: next.type,
-            };
-          } else {
-            acc[next.key] = {
-              type: 'object',
-              items: {
-                $ref: `#/definitions/${name}`,
-              },
-            };
-          }
+        if (typeof next.type === 'string') {
+          acc[next.key] = {
+            type: next.isArray ? 'array' : next.type,
+            ...(next.isArray
+              ? {
+                  items: {
+                    type: next.type,
+                  },
+                }
+              : {}),
+          };
         } else {
-          if (typeof next.type === 'string') {
-            acc[next.key] = {
-              type: 'array',
-              items: {
-                type: next.type,
-              },
-            };
-          } else {
-            definitions.push({ ...this.generateDefinitions((next.type as any).name, this.getProperties(next.type)) });
-
-            acc[next.key] = {
-              type: 'array',
-              items: {
-                $ref: `#/definitions/${name}`,
-              },
-            };
-          }
+          schemas.push({ ...this.generateSchemas((next.type as any).name, this.getProperties(next.type)) });
+          acc[next.key] = {
+            type: next.isArray ? 'array' : 'object',
+            items: {
+              $ref: `#/components/schemas/${(next.type as any).name}`,
+            },
+          };
         }
       }
 
       return acc;
-    }, {});
-
-    const additionalDefinitions = definitions.reduce<Record<string, any>>((acc, next) => {
-      return { ...acc, ...next };
     }, {});
 
     return {
@@ -192,7 +156,7 @@ class SwaggerApplication {
         required,
         properties: swaggerProperties,
       },
-      ...additionalDefinitions,
+      ...parceArrayJson(schemas),
     };
   };
 
@@ -203,18 +167,6 @@ class SwaggerApplication {
     const factory = new PropertyFactory(properties);
     const modelProperties = factory.getModelProperties(prototype);
     return modelProperties;
-  };
-
-  private getParameters = (inName: string, properties: TProperty[]) => {
-    return properties.map((property) => {
-      const { key, type, isArray, nullable } = property;
-      return {
-        in: inName,
-        name: key,
-        required: !nullable,
-        type: isArray ? 'array' : type,
-      };
-    });
   };
 }
 

@@ -10,6 +10,7 @@ export type TSwaggerDocuments = {
   tag: string;
   basePath: string;
   paths: TPath[];
+  summary?: string;
 };
 
 export type TModelProperty = TProperty & {
