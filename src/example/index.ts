@@ -1,30 +1,9 @@
-import { Property, RequestAPI } from 'decorators';
+import { RequestAPI } from 'decorators';
 import { ApiTags } from 'decorators/api-tags';
 import type { NextFunction, Request, Response } from 'express';
-
 import { Router } from 'express';
 
-class TestDTO2 {
-  @Property({ type: 'string' })
-  adsfasd: string;
-
-  @Property({ type: 'number' })
-  sdfsa: number;
-}
-
-class TestDTO {
-  @Property({ type: 'string' })
-  name: string;
-
-  @Property({ type: 'number' })
-  age: number;
-
-  @Property({ type: 'string', isArray: true })
-  names: string[];
-
-  @Property({ type: TestDTO2, isArray: true })
-  testDto: TestDTO2[];
-}
+import { TestDTO, TestDTO2 } from './dto';
 
 @ApiTags({ path: '/test', tag: 'test' })
 export class Test {

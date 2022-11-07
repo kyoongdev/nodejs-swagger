@@ -60,7 +60,7 @@ export const defaultOptions: TProperty = {
   required: true,
 };
 
-export interface SwaggerOptions {
+export interface SwaggerRequestOptions {
   path: string;
   method: HTTPMethod;
   summary?: string;
@@ -69,96 +69,9 @@ export interface SwaggerOptions {
   query?: TProperty | TProperty[];
   body?: TProperty;
 }
-const ex = {
-  openapi: '3.0.0',
-  servers: [
-    {
-      url: 'http://localhost:8000',
-      description: 'dev',
-      variables: {},
-    },
-  ],
-  info: {
-    version: '0.0.1',
-    title: 'example',
-    description: '',
-    termsOfService: '',
-    contact: {},
-    license: {
-      name: '',
-    },
-  },
-  paths: {
-    '/test/real': {
-      get: {
-        tags: ['test'],
-        responses: {},
-        parameters: {
-          in: 'body',
-          name: 'body',
-          schemea: {
-            $ref: '#/definitions/User',
-          },
-        },
-      },
-    },
-  },
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-    },
-  },
-  security: [
-    {
-      bearerAuth: [],
-    },
-  ],
-  tags: [],
-  externalDocs: {
-    url: '',
-    description: '',
-  },
-  definitions: {
-    TestDTO: {},
-    User: {
-      required: ['name', '_id', 'companies'],
-      type: 'object',
-      properties: {
-        _id: {
-          type: 'integer',
-          uniqueItems: true,
-        },
-        isPublic: {
-          type: 'boolean',
-        },
-        name: {
-          type: 'string',
-        },
-        books: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: {
-                type: 'string',
-              },
-              amount: {
-                type: 'number',
-              },
-            },
-          },
-        },
-        companies: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-        },
-      },
-    },
-  },
+
+export type SwaggerResponseOptions = TProperty & {
+  status: number;
+  schema?: any;
+  isPaging?: boolean;
 };

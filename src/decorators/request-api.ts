@@ -1,9 +1,9 @@
 import { isUndefined, negate, pickBy } from 'lodash';
 import { DECORATORS } from './constants';
-import type { ParamDecorators, SwaggerOptions } from './type';
-import { createBody, createHeader, createParam, createQuery } from './utils';
+import { createBody, createHeader, createParam, createQuery } from './request-utils';
+import type { ParamDecorators, SwaggerRequestOptions } from './type';
 
-export const RequestAPI = (props: SwaggerOptions) => {
+export const RequestAPI = (props: SwaggerRequestOptions) => {
   const { headers, params, query, body, path, method, summary } = props;
   const paramDecorators: ParamDecorators[] = [];
 
@@ -17,14 +17,6 @@ export const RequestAPI = (props: SwaggerOptions) => {
       if (descriptor) {
         const parameters = Reflect.getMetadata(DECORATORS.API_PARAMETERS, descriptor.value) || [];
 
-        Reflect.defineMetadata(
-          DECORATORS.API_METHOD,
-          {
-            pathName: path,
-            method,
-          },
-          descriptor.value
-        );
         Reflect.defineMetadata(
           DECORATORS.API_PARAMETERS,
           [
