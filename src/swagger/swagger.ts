@@ -27,23 +27,17 @@ class SwaggerApplication {
 
       const methods = Object.getOwnPropertyNames(router.prototype).filter((item) => item !== 'constructor');
 
-      const { paths, response } = methods.reduce<{ response: Array<Record<string, any>>; paths: Array<TPath> }>(
-        (acc, next) => {
-          const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
+      const paths = methods.reduce<Array<TPath>>((acc, next) => {
+        const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
 
-          const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
-          params.forEach((param) => {
-            acc.paths.push({ params: param, properties: this.getProperties(param.type as any), response });
-            expressRouter[param.method](param.path, instance[next]);
-          });
+        const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
+        params.forEach((param) => {
+          acc.push({ params: param, properties: this.getProperties(param.type as any), response });
+          expressRouter[param.method](param.path, instance[next]);
+        });
 
-          return acc;
-        },
-        {
-          response: [],
-          paths: [],
-        }
-      );
+        return acc;
+      }, []);
 
       instances.push({
         instance,
@@ -84,7 +78,7 @@ class SwaggerApplication {
   private generateSwaggerDocs = (swaggerDocs: TSwaggerDocuments[]) => {
     const schemaProps: any[] = [];
 
-    const docs = swaggerDocs.reduce<Record<string, any>>((acc, swaggerDoc) => {
+    const docs = swaggerDocs.reduce<any[]>((acc, swaggerDoc) => {
       const { basePath, paths, tag } = swaggerDoc;
 
       const schemaObj: Record<string, any> = {
@@ -95,7 +89,7 @@ class SwaggerApplication {
         parameters: [],
       };
 
-      return paths.reduce<Record<string, any>>((acc, next) => {
+      const schemas = paths.reduce<Record<string, any>>((acc, next) => {
         const { params, properties, response } = next;
 
         const schemaName = (params.type as any).name;
@@ -134,11 +128,13 @@ class SwaggerApplication {
 
         return acc;
       }, {});
-    }, {});
+      acc.push(schemas);
+      return acc;
+    }, []);
 
     return {
       ...defaultSwagger,
-      paths: docs,
+      paths: parceArrayJson(docs),
       components: {
         schemas: parceArrayJson(schemaProps),
       },
@@ -189,6 +185,7 @@ class SwaggerApplication {
     const { prototype } = type as any;
 
     const properties = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, prototype) || [];
+
     const factory = new PropertyFactory(properties);
     const modelProperties = factory.getModelProperties(prototype);
     return modelProperties;
