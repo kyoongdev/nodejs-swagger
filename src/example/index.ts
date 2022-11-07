@@ -1,4 +1,4 @@
-import { RequestAPI } from 'decorators';
+import { RequestAPI, ResponseAPI } from 'decorators';
 import { ApiTags } from 'decorators/api-tags';
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
@@ -23,6 +23,10 @@ export class Test {
       type: TestDTO2,
     },
   })
+  @ResponseAPI({
+    type: TestDTO,
+    status: 200,
+  })
   public test(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');
   }
@@ -38,6 +42,10 @@ export class Test {
       type: TestDTO,
     },
   })
+  @ResponseAPI({
+    type: TestDTO,
+    status: 200,
+  })
   public test2(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');
   }
@@ -51,6 +59,10 @@ export class Test {
     query: {
       type: TestDTO,
     },
+  })
+  @ResponseAPI({
+    type: TestDTO,
+    status: 200,
   })
   public test3(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');

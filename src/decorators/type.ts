@@ -71,7 +71,7 @@ export interface SwaggerRequestOptions {
 }
 
 export type SwaggerResponseOptions = TProperty & {
-  status: number;
+  status?: number;
   schema?: any;
   isPaging?: boolean;
 };
