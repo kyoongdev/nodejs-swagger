@@ -27,20 +27,20 @@ class SwaggerApplication {
 
       const methods = Object.getOwnPropertyNames(router.prototype).filter((item) => item !== 'constructor');
 
-      const { paths, response } = methods.reduce<{ response: Record<string, any> | null; paths: Array<TPath> }>(
+      const { paths, response } = methods.reduce<{ response: Array<Record<string, any>>; paths: Array<TPath> }>(
         (acc, next) => {
           const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
 
-          acc.response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]) ?? null;
+          const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
           params.forEach((param) => {
-            acc.paths.push({ params: param, properties: this.getProperties(param.type as any) });
+            acc.paths.push({ params: param, properties: this.getProperties(param.type as any), response });
             expressRouter[param.method](param.path, instance[next]);
           });
 
           return acc;
         },
         {
-          response: null,
+          response: [],
           paths: [],
         }
       );
@@ -52,7 +52,6 @@ class SwaggerApplication {
           tag,
           basePath,
           paths,
-          response,
         },
       });
       return instances;
@@ -86,7 +85,7 @@ class SwaggerApplication {
     const schemaProps: any[] = [];
 
     const docs = swaggerDocs.reduce<Record<string, any>>((acc, swaggerDoc) => {
-      const { basePath, paths, tag, response } = swaggerDoc;
+      const { basePath, paths, tag } = swaggerDoc;
 
       const schemaObj: Record<string, any> = {
         operationId: '',
@@ -95,20 +94,9 @@ class SwaggerApplication {
         requestBody: {},
         parameters: [],
       };
-      const responseObj: Record<string, any> = {
-        responses: {},
-      };
-      if (response) {
-        const { responses, schemas } = registerResponse(response);
-        const responseSchemas = schemas.map((schema) => {
-          return this.generateSchemas((schema as any).name, this.getProperties(schema));
-        });
-        responseObj.responses = responses;
-        schemaProps.push(...responseSchemas);
-      }
 
       return paths.reduce<Record<string, any>>((acc, next) => {
-        const { params, properties } = next;
+        const { params, properties, response } = next;
 
         const schemaName = (params.type as any).name;
         const schemaKeys = flatten(schemaProps.map((prop) => Object.keys(prop)));
@@ -120,6 +108,18 @@ class SwaggerApplication {
         } else {
           schemaObj['parameters'] = registerParams(params.in || '', properties);
         }
+
+        const responseObj: Record<string, any> = {
+          responses: {},
+        };
+
+        const { responses, schemas } = registerResponse(response);
+
+        const responseSchemas = schemas.map((schema) => {
+          return this.generateSchemas((schema as any).name, this.getProperties(schema));
+        });
+        responseObj.responses = responses;
+        schemaProps.push(...responseSchemas);
 
         schemaObj.operationId = `${params.method}:${basePath + params.path}`;
         schemaObj.summary = params.summary ?? '';
@@ -135,7 +135,7 @@ class SwaggerApplication {
         return acc;
       }, {});
     }, {});
-    console.log(schemaProps);
+
     return {
       ...defaultSwagger,
       paths: docs,

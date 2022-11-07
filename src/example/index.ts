@@ -3,7 +3,7 @@ import { ApiTags } from 'decorators/api-tags';
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 
-import { TestDTO, TestDTO2 } from './dto';
+import { EmptyResponse, TestDTO, TestDTO2 } from './dto';
 
 @ApiTags({ path: '/test', tag: 'test' })
 export class Test {
@@ -43,7 +43,8 @@ export class Test {
     },
   })
   @ResponseAPI({
-    type: TestDTO,
+    type: TestDTO2,
+    isPaging: true,
     status: 200,
   })
   public test2(req: Request, res: Response, next: NextFunction) {
@@ -61,8 +62,8 @@ export class Test {
     },
   })
   @ResponseAPI({
-    type: TestDTO,
-    status: 200,
+    type: EmptyResponse,
+    status: 204,
   })
   public test3(req: Request, res: Response, next: NextFunction) {
     res.status(200).send('hello');

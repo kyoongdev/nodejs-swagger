@@ -12,7 +12,7 @@ export const ResponseAPI = (props: SwaggerResponseOptions) => {
   const groupedMetadata = {
     [props.status || 'default']: omit(props, 'status'),
   };
-  if (props.isPaging && !!type) {
+  if (props.isPaging) {
     return (target: object, key?: string | symbol, descriptor?: TypedPropertyDescriptor<any>): any => {
       if (descriptor) {
         const responses = Reflect.getMetadata(DECORATORS.API_RESPONSE, descriptor.value) || {};
@@ -22,42 +22,42 @@ export const ResponseAPI = (props: SwaggerResponseOptions) => {
           {
             ...responses,
             ...groupedMetadata,
-          },
-          descriptor.value
-        );
-        return ResponseAPI({
-          schema: {
-            properties: {
-              paging: {
-                type: 'object',
-                properties: {
-                  total: {
-                    type: 'number',
-                  },
-                  page: {
-                    type: 'number',
-                  },
-                  limit: {
-                    type: 'number',
-                  },
-                  skip: {
-                    type: 'number',
-                  },
-                  hasPrev: {
-                    type: 'boolean',
-                  },
-                  hasNext: {
-                    type: 'boolean',
+
+            schema: {
+              status: props.status,
+              properties: {
+                paging: {
+                  type: 'object',
+                  properties: {
+                    total: {
+                      type: 'number',
+                    },
+                    page: {
+                      type: 'number',
+                    },
+                    limit: {
+                      type: 'number',
+                    },
+                    skip: {
+                      type: 'number',
+                    },
+                    hasPrev: {
+                      type: 'boolean',
+                    },
+                    hasNext: {
+                      type: 'boolean',
+                    },
                   },
                 },
-              },
-              data: {
-                type: 'array',
-                items: { $ref: `#/components/schemas/${(props.type as any).name}` },
+                data: {
+                  type: 'array',
+                  items: { $ref: `#/components/schemas/${(props.type as any).name}` },
+                },
               },
             },
           },
-        })(target, key, descriptor);
+          descriptor.value
+        );
       }
     };
   } else {

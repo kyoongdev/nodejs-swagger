@@ -1,4 +1,5 @@
 import type { TProperty, Type } from 'decorators/type';
+import { isNumber } from 'lodash';
 import type { TRegisterBody, TRegisterParams, TRegisterResponse } from './type';
 
 export const parceArrayJson = (arr: any[]) => arr.reduce<Record<string, any>>((acc, next) => ({ ...acc, ...next }), {});
@@ -33,17 +34,29 @@ export const registerParams = (inName: string, properties: TProperty[]): TRegist
 export const registerResponse = (response: Record<string, any>): TRegisterResponse => {
   const schemas: Array<Function | [Function] | Type<unknown> | undefined> = [];
   const responses = Object.entries(response).reduce<Record<string, any>>((acc, [key, value]) => {
-    acc[key] = {
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            $ref: `#/components/schemas/${(value.type as any).name}`,
+    if (value.type) {
+      acc[key] = {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              $ref: `#/components/schemas/${(value.type as any).name}`,
+            },
           },
         },
-      },
-    };
-    schemas.push(value.type);
+      };
+      schemas.push(value.type);
+    } else {
+      acc[value.status] = {
+        content: {
+          'application/json': {
+            schema: {
+              properties: value.properties,
+            },
+          },
+        },
+      };
+    }
     return acc;
   }, {});
 

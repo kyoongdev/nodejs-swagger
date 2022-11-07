@@ -4,14 +4,13 @@ import { Router } from 'express';
 export type TPath = {
   params: TRequestAPI;
   properties: TProperty[];
+  response: Record<string, any>;
 };
 
 export type TSwaggerDocuments = {
   tag: string;
   basePath: string;
   paths: TPath[];
-
-  response: Record<string, any> | null;
 };
 
 export type TModelProperty = TProperty & {
