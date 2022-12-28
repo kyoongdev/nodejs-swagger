@@ -1,7 +1,9 @@
 import express from 'express';
 import 'reflect-metadata';
-import { SwaggerApplication } from 'swagger';
+
 import { Test, Test2 } from './example';
+import { SwaggerApplication } from './utils';
+
 const app = express();
 
 const swaggerApplication = new SwaggerApplication(app);

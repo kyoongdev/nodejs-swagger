@@ -1,4 +1,4 @@
-import { Property } from 'decorators';
+import { Property } from '../../utils/decorators';
 
 class TestDTO2 {
   @Property({ type: 'string' })

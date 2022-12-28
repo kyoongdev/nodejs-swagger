@@ -1,4 +1,4 @@
-import { Property } from 'decorators';
+import { Property } from '../../utils/decorators';
 import TestDTO2 from './TestDTO2';
 
 class TestDTO {

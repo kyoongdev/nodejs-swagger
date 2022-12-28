@@ -1,7 +1,7 @@
-import { RequestAPI, ResponseAPI } from 'decorators';
-import { ApiTags } from 'decorators/api-tags';
 import type { NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
+import { RequestAPI, ResponseAPI } from '../utils/decorators';
+import { ApiTags } from '../utils/decorators/api-tags';
 
 import { EmptyResponse, TestDTO, TestDTO2 } from './dto';
 
