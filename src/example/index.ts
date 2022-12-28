@@ -18,6 +18,7 @@ export class Test {
     method: 'get',
     body: {
       type: TestDTO,
+      isArray: true,
     },
     query: {
       type: TestDTO2,

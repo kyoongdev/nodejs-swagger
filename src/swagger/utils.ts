@@ -4,7 +4,23 @@ import type { TRegisterBody, TRegisterParams, TRegisterResponse } from './type';
 
 export const parceArrayJson = (arr: any[]) => arr.reduce<Record<string, any>>((acc, next) => ({ ...acc, ...next }), {});
 
-export const registerBody = (schemaName: string): TRegisterBody => {
+export const registerBody = (schemaName: string, isArray?: boolean): TRegisterBody => {
+  if (isArray) {
+    return {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'array',
+            items: {
+              type: 'object',
+              $ref: `#/components/schemas/${schemaName}`,
+            },
+          },
+        },
+      },
+    };
+  }
   return {
     required: true,
     content: {

@@ -43,7 +43,8 @@ export type TRegisterBody = {
     'application/json': {
       schema: {
         type: string;
-        $ref: string;
+        $ref?: string;
+        items?: any;
       };
     };
   };

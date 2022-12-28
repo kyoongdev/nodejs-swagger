@@ -92,6 +92,7 @@ export const createQuery = (query: TProperty): ParamDecorators => {
 
 export const createBody = (body: TProperty): ParamDecorators => {
   const [type, isArray] = getTypeIsArrayTuple((body as TProperty).type, (body as TProperty).isArray as boolean);
+
   const param: TProperty & Record<string, any> = {
     in: 'body',
     ...omit(body, 'enum'),

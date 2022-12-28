@@ -17,6 +17,8 @@ export const RequestAPI = (props: SwaggerRequestOptions) => {
       if (descriptor) {
         const parameters = Reflect.getMetadata(DECORATORS.API_PARAMETERS, descriptor.value) || [];
 
+        console.log(metadata);
+
         Reflect.defineMetadata(
           DECORATORS.API_PARAMETERS,
           [

@@ -98,7 +98,7 @@ class SwaggerApplication {
         if (!schemaKeys.includes(schemaName)) schemaProps.push(this.generateSchemas(schemaName, properties));
 
         if (params.in === 'body') {
-          schemaObj['requestBody'] = registerBody(schemaName);
+          schemaObj['requestBody'] = registerBody(schemaName, next.params.isArray);
         } else {
           schemaObj['parameters'] = registerParams(params.in || '', properties);
         }
