@@ -46,8 +46,15 @@ export const registerParams = (inName: string, properties: TProperty[]): TRegist
   });
 };
 
-export const registerResponse = (response: Record<string, any>): TRegisterResponse => {
+export const registerResponse = (response?: Record<string, any>): TRegisterResponse => {
   const schemas: Array<Function | [Function] | Type<unknown> | undefined> = [];
+
+  if (!response)
+    return {
+      responses: {},
+      schemas: undefined,
+    };
+
   const responses = Object.entries(response).reduce<Record<string, any>>((acc, [key, value]) => {
     if (value.type) {
       acc[key] = {

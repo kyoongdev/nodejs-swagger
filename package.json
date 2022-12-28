@@ -1,6 +1,6 @@
 {
   "name": "nodejs-swagger",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "build/utils/index.js",
   "bin": "build/util/index.js",
   "repository": "https://github.com/maybteam/nodejs-swagger.git",

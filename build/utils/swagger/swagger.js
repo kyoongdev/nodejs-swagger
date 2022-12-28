@@ -21,7 +21,7 @@ class SwaggerApplication {
                 const paths = methods.reduce((acc, next) => {
                     const params = Reflect.getMetadata(constants_1.DECORATORS.API_PARAMETERS, instance[next]);
                     const response = Reflect.getMetadata(constants_1.DECORATORS.API_RESPONSE, instance[next]);
-                    params.forEach((param) => {
+                    params === null || params === void 0 ? void 0 : params.forEach((param) => {
                         acc.push({ params: param, properties: this.getProperties(param.type), response });
                         expressRouter[param.method](param.path, instance[next]);
                     });

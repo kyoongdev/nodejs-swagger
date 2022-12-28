@@ -14,12 +14,9 @@ export class Test {
   }
 
   @RequestAPI({
-    path: '/real',
+    path: '',
     method: 'get',
-    body: {
-      type: TestDTO,
-      isArray: true,
-    },
+
     query: {
       type: TestDTO2,
     },

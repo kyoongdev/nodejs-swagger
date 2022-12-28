@@ -31,7 +31,7 @@ class SwaggerApplication {
         const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
 
         const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
-        params.forEach((param) => {
+        params?.forEach((param) => {
           acc.push({ params: param, properties: this.getProperties(param.type as any), response });
           expressRouter[param.method](param.path, instance[next]);
         });
@@ -109,11 +109,11 @@ class SwaggerApplication {
 
         const { responses, schemas } = registerResponse(response);
 
-        const responseSchemas = schemas.map((schema) => {
+        const responseSchemas = schemas?.map((schema) => {
           return this.generateSchemas((schema as any).name, this.getProperties(schema));
         });
         responseObj.responses = responses;
-        schemaProps.push(...responseSchemas);
+        schemaProps.push(...(responseSchemas ? responseSchemas : []));
 
         schemaObj.operationId = `${params.method}:${basePath + params.path}`;
         schemaObj.summary = params.summary ?? '';
