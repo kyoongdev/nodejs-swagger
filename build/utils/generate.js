@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Swagger = void 0;
 class Swagger {
     constructor(props) {
         this.info = {
@@ -8,4 +11,5 @@ class Swagger {
         };
     }
 }
+exports.Swagger = Swagger;
 //# sourceMappingURL=generate.js.map

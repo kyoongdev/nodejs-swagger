@@ -13,7 +13,7 @@ type TSwaggerProps<T extends object> = {
   [K in keyof T]?: T[K];
 };
 
-class Swagger {
+export class Swagger {
   private info: TSwagger;
 
   constructor(props: TSwaggerProps<TSwagger>) {

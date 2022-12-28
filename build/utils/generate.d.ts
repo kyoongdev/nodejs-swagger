@@ -10,7 +10,8 @@ declare type TSwagger = {
 declare type TSwaggerProps<T extends object> = {
     [K in keyof T]?: T[K];
 };
-declare class Swagger {
+export declare class Swagger {
     private info;
     constructor(props: TSwaggerProps<TSwagger>);
 }
+export {};

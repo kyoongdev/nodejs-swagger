@@ -1,8 +1,8 @@
 {
   "name": "nodejs-swagger",
-  "version": "1.0.0",
-  "main": "build/index.js",
-  "bin": "build/express/util/index.js",
+  "version": "1.0.2",
+  "main": "build/utils/index.js",
+  "bin": "build/util/index.js",
   "repository": "https://github.com/maybteam/nodejs-swagger.git",
   "author": "kyoongdev",
   "license": "MIT",

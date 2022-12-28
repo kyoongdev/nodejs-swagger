@@ -1,4 +1,3 @@
-import { isNumber } from 'lodash';
 import { TProperty, Type } from '../decorators/type';
 import type { TRegisterBody, TRegisterParams, TRegisterResponse } from './type';
 
