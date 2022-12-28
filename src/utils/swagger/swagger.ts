@@ -31,8 +31,22 @@ class SwaggerApplication {
         const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
 
         const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
+
         params?.forEach((param) => {
-          acc.push({ params: param, properties: this.getProperties(param.type as any), response });
+          if (param.in === 'path') {
+            acc.push({
+              params: param,
+              properties: [
+                {
+                  key: param.name,
+                  ...param,
+                },
+              ],
+              response,
+            });
+          } else {
+            acc.push({ params: param, properties: this.getProperties(param.type as any, param), response });
+          }
           expressRouter[param.method](param.path, instance[next]);
         });
 
@@ -48,6 +62,7 @@ class SwaggerApplication {
           paths,
         },
       });
+
       return instances;
     }, []);
 
@@ -95,7 +110,8 @@ class SwaggerApplication {
         const schemaName = (params.type as any).name;
         const schemaKeys = flatten(schemaProps.map((prop) => Object.keys(prop)));
 
-        if (!schemaKeys.includes(schemaName)) schemaProps.push(this.generateSchemas(schemaName, properties));
+        if (!schemaKeys.includes(schemaName) && params.in !== 'path')
+          schemaProps.push(this.generateSchemas(schemaName, properties));
 
         if (params.in === 'body') {
           schemaObj['requestBody'] = registerBody(schemaName, next.params.isArray);
@@ -123,6 +139,7 @@ class SwaggerApplication {
           [params.method]: {
             ...schemaObj,
             ...responseObj,
+            parameters: [...(acc[basePath + params.path]?.[params.method]?.parameters ?? []), ...schemaObj.parameters],
           },
         };
 
@@ -181,13 +198,17 @@ class SwaggerApplication {
     };
   };
 
-  private getProperties = (type?: Function | Type<unknown> | [Function] | undefined): TModelProperty[] => {
+  private getProperties = (
+    type?: Function | Type<unknown> | [Function] | undefined,
+    param?: TRequestAPI
+  ): TModelProperty[] => {
     const { prototype } = type as any;
 
-    const properties = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, prototype) || [];
+    const properties = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES_ARRAY, prototype ?? {}) || [];
 
     const factory = new PropertyFactory(properties);
     const modelProperties = factory.getModelProperties(prototype);
+
     return modelProperties;
   };
 }

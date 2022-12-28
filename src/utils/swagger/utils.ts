@@ -39,9 +39,17 @@ export const registerParams = (inName: string, properties: TProperty[]): TRegist
       in: inName,
       name: property.key,
       required: !property.nullable,
-      schema: {
-        type: property.type,
-      },
+      ...(!!property.type
+        ? {
+            schema: {
+              type: property.type,
+            },
+          }
+        : {
+            schema: {
+              type: undefined,
+            },
+          }),
     };
   });
 };

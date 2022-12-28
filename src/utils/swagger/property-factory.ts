@@ -1,3 +1,4 @@
+import { TRequestAPI } from '../decorators';
 import { DECORATORS } from '../decorators/constants';
 import type { TModelProperty } from './type';
 
@@ -10,6 +11,7 @@ export class PropertyFactory {
 
   getModelProperties = (prototype: any): TModelProperty[] => {
     const targets = this.parseProperties();
+
     const properties = targets.map((target) => {
       const property = Reflect.getMetadata(DECORATORS.API_MODEL_PROPERTIES, prototype, target);
 

@@ -86,11 +86,11 @@ class SwaggerApplication {
                         responses: {},
                     };
                     const { responses, schemas } = (0, utils_1.registerResponse)(response);
-                    const responseSchemas = schemas.map((schema) => {
+                    const responseSchemas = schemas === null || schemas === void 0 ? void 0 : schemas.map((schema) => {
                         return this.generateSchemas(schema.name, this.getProperties(schema));
                     });
                     responseObj.responses = responses;
-                    schemaProps.push(...responseSchemas);
+                    schemaProps.push(...(responseSchemas ? responseSchemas : []));
                     schemaObj.operationId = `${params.method}:${basePath + params.path}`;
                     schemaObj.summary = (_a = params.summary) !== null && _a !== void 0 ? _a : '';
                     acc[basePath + params.path] = Object.assign(Object.assign({}, ((_b = acc[basePath + params.path]) !== null && _b !== void 0 ? _b : {})), { [params.method]: Object.assign(Object.assign({}, schemaObj), responseObj) });

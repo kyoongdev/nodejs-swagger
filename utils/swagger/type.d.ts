@@ -20,7 +20,7 @@ export declare type TInstance = {
 };
 export declare type TRegisterResponse = {
     responses: Record<string, any>;
-    schemas: Array<Function | [Function] | Type<unknown> | undefined>;
+    schemas: Array<Function | [Function] | Type<unknown> | undefined> | undefined;
 };
 export declare type TRegisterParams = {
     in: string;

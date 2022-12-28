@@ -48,6 +48,11 @@ const registerParams = (inName, properties) => {
 exports.registerParams = registerParams;
 const registerResponse = (response) => {
     const schemas = [];
+    if (!response)
+        return {
+            responses: {},
+            schemas: undefined,
+        };
     const responses = Object.entries(response).reduce((acc, [key, value]) => {
         if (value.type) {
             acc[key] = {
