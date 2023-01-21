@@ -33,6 +33,7 @@ class SwaggerApplication {
 
 <<<<<<< Updated upstream:src/utils/swagger/swagger.ts
 <<<<<<< Updated upstream:src/utils/swagger/swagger.ts
+<<<<<<< Updated upstream:src/utils/swagger/swagger.ts
         params?.forEach((param) => {
           if (param.in === 'path') {
             acc.push({
@@ -49,6 +50,8 @@ class SwaggerApplication {
             acc.push({ params: param, properties: this.getProperties(param.type as any, param), response });
           }
 =======
+=======
+>>>>>>> Stashed changes:src/swagger/swagger.ts
 =======
 >>>>>>> Stashed changes:src/swagger/swagger.ts
         params.forEach((param) => {
