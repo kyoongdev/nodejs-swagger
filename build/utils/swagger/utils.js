@@ -35,14 +35,17 @@ const registerBody = (schemaName, isArray) => {
 exports.registerBody = registerBody;
 const registerParams = (inName, properties) => {
     return properties.map((property) => {
-        return {
-            in: inName,
-            name: property.key,
-            required: !property.nullable,
-            schema: {
-                type: property.type,
-            },
-        };
+        return Object.assign({ in: inName, name: property.key, required: !property.nullable }, (!!property.type
+            ? {
+                schema: {
+                    type: property.type,
+                },
+            }
+            : {
+                schema: {
+                    type: undefined,
+                },
+            }));
     });
 };
 exports.registerParams = registerParams;

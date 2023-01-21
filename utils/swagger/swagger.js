@@ -22,6 +22,21 @@ class SwaggerApplication {
                     const params = Reflect.getMetadata(constants_1.DECORATORS.API_PARAMETERS, instance[next]);
                     const response = Reflect.getMetadata(constants_1.DECORATORS.API_RESPONSE, instance[next]);
                     params === null || params === void 0 ? void 0 : params.forEach((param) => {
+                        if (param.in === 'path') {
+                            acc.push({
+                                params: param,
+                                properties: [
+                                    Object.assign({ key: param.name }, param),
+                                ],
+                                response,
+                            });
+                        }
+                        else {
+                            acc.push({ params: param, properties: this.getProperties(param.type, param), response });
+                        }
+                        expressRouter[param.method](param.path, instance[next]);
+                    });
+                    params.forEach((param) => {
                         acc.push({ params: param, properties: this.getProperties(param.type), response });
                         expressRouter[param.method](param.path, instance[next]);
                     });
@@ -70,11 +85,11 @@ class SwaggerApplication {
                     parameters: [],
                 };
                 const schemas = paths.reduce((acc, next) => {
-                    var _a, _b;
+                    var _a, _b, _c, _d, _e;
                     const { params, properties, response } = next;
                     const schemaName = params.type.name;
                     const schemaKeys = (0, lodash_1.flatten)(schemaProps.map((prop) => Object.keys(prop)));
-                    if (!schemaKeys.includes(schemaName))
+                    if (!schemaKeys.includes(schemaName) && params.in !== 'path')
                         schemaProps.push(this.generateSchemas(schemaName, properties));
                     if (params.in === 'body') {
                         schemaObj['requestBody'] = (0, utils_1.registerBody)(schemaName, next.params.isArray);
@@ -93,7 +108,7 @@ class SwaggerApplication {
                     schemaProps.push(...(responseSchemas ? responseSchemas : []));
                     schemaObj.operationId = `${params.method}:${basePath + params.path}`;
                     schemaObj.summary = (_a = params.summary) !== null && _a !== void 0 ? _a : '';
-                    acc[basePath + params.path] = Object.assign(Object.assign({}, ((_b = acc[basePath + params.path]) !== null && _b !== void 0 ? _b : {})), { [params.method]: Object.assign(Object.assign({}, schemaObj), responseObj) });
+                    acc[basePath + params.path] = Object.assign(Object.assign({}, ((_b = acc[basePath + params.path]) !== null && _b !== void 0 ? _b : {})), { [params.method]: Object.assign(Object.assign(Object.assign({}, schemaObj), responseObj), { parameters: [...((_e = (_d = (_c = acc[basePath + params.path]) === null || _c === void 0 ? void 0 : _c[params.method]) === null || _d === void 0 ? void 0 : _d.parameters) !== null && _e !== void 0 ? _e : []), ...schemaObj.parameters] }) });
                     return acc;
                 }, {});
                 acc.push(schemas);
@@ -134,9 +149,9 @@ class SwaggerApplication {
                     properties: swaggerProperties,
                 } }, (0, utils_1.parceArrayJson)(schemas));
         };
-        this.getProperties = (type) => {
+        this.getProperties = (type, param) => {
             const { prototype } = type;
-            const properties = Reflect.getMetadata(constants_1.DECORATORS.API_MODEL_PROPERTIES_ARRAY, prototype) || [];
+            const properties = Reflect.getMetadata(constants_1.DECORATORS.API_MODEL_PROPERTIES_ARRAY, prototype !== null && prototype !== void 0 ? prototype : {}) || [];
             const factory = new property_factory_1.PropertyFactory(properties);
             const modelProperties = factory.getModelProperties(prototype);
             return modelProperties;
