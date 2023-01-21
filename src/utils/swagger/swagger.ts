@@ -29,9 +29,10 @@ class SwaggerApplication {
 
       const paths = methods.reduce<Array<TPath>>((acc, next) => {
         const params: TRequestAPI[] = Reflect.getMetadata(DECORATORS.API_PARAMETERS, instance[next]);
-
         const response = Reflect.getMetadata(DECORATORS.API_RESPONSE, instance[next]);
 
+<<<<<<< Updated upstream:src/utils/swagger/swagger.ts
+<<<<<<< Updated upstream:src/utils/swagger/swagger.ts
         params?.forEach((param) => {
           if (param.in === 'path') {
             acc.push({
@@ -47,6 +48,12 @@ class SwaggerApplication {
           } else {
             acc.push({ params: param, properties: this.getProperties(param.type as any, param), response });
           }
+=======
+=======
+>>>>>>> Stashed changes:src/swagger/swagger.ts
+        params.forEach((param) => {
+          acc.push({ params: param, properties: this.getProperties(param.type as any), response });
+>>>>>>> Stashed changes:src/swagger/swagger.ts
           expressRouter[param.method](param.path, instance[next]);
         });
 
