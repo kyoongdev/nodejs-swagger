@@ -21,6 +21,7 @@ class SwaggerApplication {
   public initSwagger = (routers: Array<Function>) => {
     const instances = routers.reduce<TInstance[]>((instances, router) => {
       const expressRouter = Router() as any;
+      console.log('asdf');
       const instance = new (router as any)();
 
       const { tag, path: basePath }: TApiTag = Reflect.getMetadata(DECORATORS.API_TAGS, router);
